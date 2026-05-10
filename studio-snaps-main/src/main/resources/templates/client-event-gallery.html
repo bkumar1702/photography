@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Photo Selection - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="gallery-page">
+      <section class="gallery-card client-selection-card">
+        <nav class="site-nav client-private-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+        </nav>
+
+        <header class="gallery-header">
+          <span class="back-link" aria-hidden="true">M</span>
+          <h1>Photo Selection</h1>
+          <span class="icon-button" aria-hidden="true" th:text="${selectedPhotoCount}">0</span>
+        </header>
+
+        <section class="album-info">
+          <div class="avatar avatar-placeholder" th:text="${event.clientName.substring(0, 1).toUpperCase()}">M</div>
+          <div>
+            <h2 id="gallery-client-title">
+              <span th:text="${event.clientName}">Client</span>
+              <span> - </span>
+              <span th:text="${event.eventType}">Event</span>
+            </h2>
+            <p id="gallery-client-date" th:text="${event.eventDate != null ? #temporals.format(event.eventDate, 'dd MMM yyyy') : 'Gallery'}">Gallery date</p>
+          </div>
+        </section>
+
+        <section class="client-selection-summary">
+          <strong>
+            <span th:text="${selectedPhotoCount}">0</span>
+            <span> selected</span>
+          </strong>
+          <p>Select the photos you want the studio to edit or deliver.</p>
+        </section>
+
+        <p class="upload-message selection-message" th:if="${selectionMessage}" th:text="${selectionMessage}">Selection sent.</p>
+
+        <div class="gallery-tabs" th:if="${photos != null and !photos.isEmpty()}">
+          <button class="active" type="button" data-gallery-tab="client-all-photos">
+            <span>All Photos</span>
+            <strong th:text="${photos.size()}">0</strong>
+          </button>
+          <button type="button" data-gallery-tab="client-favourites">
+            <span>Favourites</span>
+            <strong th:text="${selectedPhotoCount}">0</strong>
+          </button>
+        </div>
+
+        <section class="photo-grid event-photo-grid client-selection-grid client-browse-grid gallery-tab-panel active" id="client-all-photos" th:if="${photos != null and !photos.isEmpty()}">
+          <article class="event-photo-card client-photo-card" th:each="photo, photoStat : ${photos}">
+            <form class="photo-select-form client-photo-form" th:action="@{/client/events/{eventId}/photos/{photoId}/select(eventId=${event.id}, photoId=${photo.id})}" method="post" th:attr="data-photo-id=${photo.id}">
+              <input type="hidden" name="token" th:value="${token}" />
+              <input type="hidden" name="selected" th:value="${!photo.selectedByClient}" />
+              <button class="photo-tile client-lightbox-photo" th:classappend="${photo.selectedByClient} ? ' selected'" type="button" th:attr="data-photo-index=${photoStat.index},data-photo-id=${photo.id},data-photo-src=${photoUrls.get(photo.id)},data-photo-alt=${photo.originalFileName},data-photo-selected=${photo.selectedByClient}">
+                <img th:src="${photoUrls.get(photo.id)}" th:alt="${photo.originalFileName}" loading="lazy" decoding="async" />
+              </button>
+              <button class="photo-favourite-button" th:classappend="${photo.selectedByClient} ? ' selected'" type="submit" th:aria-label="${photo.selectedByClient} ? 'Remove from favourites' : 'Add to favourites'">
+                <span aria-hidden="true" th:text="${photo.selectedByClient} ? '&#9829;' : '&#9825;'">&hearts;</span>
+              </button>
+            </form>
+          </article>
+        </section>
+
+        <section class="gallery-tab-panel" id="client-favourites" th:if="${photos != null and !photos.isEmpty()}">
+          <div class="photo-grid event-photo-grid client-selection-grid client-browse-grid" aria-label="Client selected photos" th:if="${selectedPhotos != null and !selectedPhotos.isEmpty()}">
+            <article class="event-photo-card client-photo-card" th:each="photo : ${selectedPhotos}" th:if="${photo.selectedByClient}">
+              <form class="photo-select-form client-photo-form" th:action="@{/client/events/{eventId}/photos/{photoId}/select(eventId=${event.id}, photoId=${photo.id})}" method="post" th:attr="data-photo-id=${photo.id}">
+                <input type="hidden" name="token" th:value="${token}" />
+                <input type="hidden" name="selected" value="false" />
+                <button class="photo-tile client-lightbox-photo selected" type="button" th:attr="data-photo-id=${photo.id},data-photo-src=${photoUrls.get(photo.id)},data-photo-alt=${photo.originalFileName},data-photo-selected=${photo.selectedByClient}">
+                  <img th:src="${photoUrls.get(photo.id)}" th:alt="${photo.originalFileName}" loading="lazy" decoding="async" />
+                </button>
+                <button class="photo-favourite-button selected" type="submit" aria-label="Remove from favourites">
+                  <span aria-hidden="true">&#9829;</span>
+                </button>
+              </form>
+            </article>
+          </div>
+
+          <article class="empty-state compact-empty" th:if="${selectedPhotos == null or selectedPhotos.isEmpty()}">
+            <strong>No favourites yet</strong>
+            <p>Select photos from All Photos and they will appear here.</p>
+          </article>
+
+          <form class="favourites-submit" id="client-submit-selection-form" th:if="${selectedPhotos != null and !selectedPhotos.isEmpty()}" th:action="@{/client/events/{id}/submit-selection(id=${event.id})}" method="post">
+            <input type="hidden" name="token" th:value="${token}" />
+            <button class="button gold-button" type="button" id="open-selection-confirm">Send Favourites to Photographer</button>
+          </form>
+        </section>
+
+        <section class="photo-grid" th:if="${photos == null or photos.isEmpty()}">
+          <article class="empty-state gallery-empty">
+            <strong>No photos uploaded yet</strong>
+            <p>Your studio will share photos here when the gallery is ready.</p>
+          </article>
+        </section>
+
+        <footer class="gallery-footer">
+          <strong><span th:text="${selectedPhotoCount}">0</span> Photos Selected</strong>
+          <button class="button light-button" type="button" data-gallery-tab="client-favourites">Review Favourites</button>
+        </footer>
+      </section>
+
+      <section class="share-modal" id="selection-confirm-modal" aria-hidden="true">
+        <div class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="selection-confirm-title">
+          <header class="upload-header">
+            <button class="back-link" type="button" data-close-selection-confirm aria-label="Close confirmation">&lsaquo;</button>
+            <h2 id="selection-confirm-title">Send Selection?</h2>
+            <span class="icon-button" aria-hidden="true" th:text="${selectedPhotoCount}">0</span>
+          </header>
+
+          <div class="share-copy-box">
+            <p>
+              <span>You selected </span>
+              <strong th:text="${selectedPhotoCount}">0</strong>
+              <span> favourite photo(s). The photographer will see them in a separate Client Favourites tab.</span>
+            </p>
+            <button class="button gold-button" type="button" id="confirm-send-selection">Yes, Send Favourites</button>
+            <button class="button light-button" type="button" data-close-selection-confirm>Review Again</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="client-photo-lightbox" id="client-photo-lightbox" aria-hidden="true">
+        <div class="client-lightbox-stage" role="dialog" aria-modal="true" aria-label="Photo viewer">
+          <button class="client-lightbox-close" type="button" data-close-client-lightbox aria-label="Close photo viewer">&times;</button>
+          <button class="client-lightbox-favourite" type="button" id="client-lightbox-favourite" aria-label="Add to favourites">
+            <span aria-hidden="true">&#9825;</span>
+          </button>
+          <button class="client-lightbox-nav previous" type="button" data-client-lightbox-prev aria-label="Previous photo">&lsaquo;</button>
+          <img id="client-lightbox-image" alt="" />
+          <button class="client-lightbox-nav next" type="button" data-client-lightbox-next aria-label="Next photo">&rsaquo;</button>
+          <div class="client-lightbox-meta">
+            <strong id="client-lightbox-counter">1 / 1</strong>
+            <span id="client-lightbox-caption">Photo</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

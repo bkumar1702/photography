@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Photos - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="event-detail-page">
+      <section class="event-detail-card photographer-photo-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a class="active" href="/photographers">For Photographers</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+          </div>
+
+          <a class="button gold-button" th:href="@{/events/{id}(id=${event.id})}">Event Details</a>
+        </nav>
+
+        <header class="event-detail-hero photographer-photo-hero">
+          <a class="back-link" th:href="@{/events/{id}(id=${event.id})}">&lsaquo;</a>
+          <div>
+            <p th:text="${event.eventType}">Event Type</p>
+            <h1>
+              <span th:text="${event.clientName}">Client name</span>
+              <span> Photos</span>
+            </h1>
+          </div>
+        </header>
+
+        <section class="event-photo-section photographer-photo-section">
+          <p class="upload-message" th:if="${uploadMessage}" th:text="${uploadMessage}">Photo deleted.</p>
+          <p class="upload-message" th:if="${event.clientSelectionSubmitted}">
+            <span>Client sent </span>
+            <span th:text="${selectedPhotoCount}">0</span>
+            <span> selected photo(s)</span>
+            <span th:if="${event.clientSelectionSubmittedAt != null}">
+              <span> on </span>
+              <span th:text="${#temporals.format(event.clientSelectionSubmittedAt, 'dd MMM yyyy, hh:mm a')}">date</span>
+            </span>
+            <span>.</span>
+          </p>
+
+          <div class="section-heading event-photo-heading">
+            <h2>Uploaded Photos</h2>
+            <span class="photo-count">
+              <span th:text="${photos.size()}">0</span>
+              <span> photos</span>
+              <span> / </span>
+              <span th:text="${selectedPhotoCount}">0</span>
+              <span> selected</span>
+            </span>
+          </div>
+
+          <div class="gallery-tabs photographer-gallery-tabs" th:if="${photos != null and !photos.isEmpty()}">
+            <button class="active" type="button" data-gallery-tab="photographer-all-photos">
+              <span>All Photos</span>
+              <strong th:text="${photos.size()}">0</strong>
+            </button>
+            <button type="button" data-gallery-tab="photographer-favourites">
+              <span>Client Favourites</span>
+              <strong th:text="${selectedPhotoCount}">0</strong>
+            </button>
+          </div>
+
+          <div class="photo-grid event-photo-grid photographer-browse-grid gallery-tab-panel active" id="photographer-all-photos" th:if="${photos != null and !photos.isEmpty()}">
+            <article class="event-photo-card photographer-photo-item" th:each="photo, photoStat : ${photos}">
+              <button class="photo-tile client-lightbox-photo" th:classappend="${photo.selectedByClient} ? ' selected'" type="button" th:attr="data-photo-index=${photoStat.index},data-photo-id=${photo.id},data-photo-src=${photoUrls.get(photo.id)},data-photo-alt=${photo.originalFileName},data-photo-selected=${photo.selectedByClient}">
+                <img th:src="${photoUrls.get(photo.id)}" th:alt="${photo.originalFileName}" loading="lazy" decoding="async" />
+                <span th:if="${photo.selectedByClient}">&check;</span>
+              </button>
+              <form class="photo-delete-overlay" th:action="@{/events/{eventId}/photos/{photoId}/delete(eventId=${event.id}, photoId=${photo.id})}" method="post">
+                <button class="delete-photo-button" type="submit" aria-label="Delete photo">Delete</button>
+              </form>
+            </article>
+          </div>
+
+          <section class="gallery-tab-panel" id="photographer-favourites" th:if="${photos != null and !photos.isEmpty()}">
+            <div class="section-heading favourite-heading">
+              <h2>Client Favourites</h2>
+              <button class="button light-button print-selected-button" th:if="${selectedPhotos != null and !selectedPhotos.isEmpty()}" type="button" id="print-selected-photos">Print</button>
+            </div>
+
+            <div class="photo-grid event-photo-grid photographer-browse-grid print-photo-grid" th:if="${selectedPhotos != null and !selectedPhotos.isEmpty()}">
+              <article class="event-photo-card photographer-photo-item" th:each="photo : ${selectedPhotos}">
+                <button class="photo-tile client-lightbox-photo selected" type="button" th:attr="data-photo-id=${photo.id},data-photo-src=${photoUrls.get(photo.id)},data-photo-alt=${photo.originalFileName},data-photo-selected=${photo.selectedByClient}">
+                  <img th:src="${photoUrls.get(photo.id)}" th:alt="${photo.originalFileName}" loading="lazy" decoding="async" />
+                  <span>&check;</span>
+                </button>
+              </article>
+            </div>
+
+            <article class="empty-state compact-empty" th:if="${selectedPhotos == null or selectedPhotos.isEmpty()}">
+              <strong>No favourites sent yet</strong>
+              <p>Client favourites will appear here after the client selects and sends them.</p>
+            </article>
+          </section>
+
+          <article class="empty-state gallery-empty" th:if="${photos == null or photos.isEmpty()}">
+            <strong>No photos uploaded yet</strong>
+            <p>Upload photos from the event details page to review them here.</p>
+          </article>
+        </section>
+
+        <nav class="dashboard-tabs dashboard-tabs-compact events-tabs" aria-label="Dashboard menu">
+          <a href="/">&#8962;<span>Dashboard</span></a>
+          <a class="active" href="/events">&#9633;<span>Events</span></a>
+        </nav>
+      </section>
+
+      <section class="client-photo-lightbox" id="client-photo-lightbox" aria-hidden="true">
+        <div class="client-lightbox-stage" role="dialog" aria-modal="true" aria-label="Photo viewer">
+          <button class="client-lightbox-close" type="button" data-close-client-lightbox aria-label="Close photo viewer">&times;</button>
+          <button class="client-lightbox-nav previous" type="button" data-client-lightbox-prev aria-label="Previous photo">&lsaquo;</button>
+          <img id="client-lightbox-image" alt="" />
+          <button class="client-lightbox-nav next" type="button" data-client-lightbox-next aria-label="Next photo">&rsaquo;</button>
+          <div class="client-lightbox-meta">
+            <strong id="client-lightbox-counter">1 / 1</strong>
+            <span id="client-lightbox-caption">Photo</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

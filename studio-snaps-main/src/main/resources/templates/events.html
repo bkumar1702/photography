@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Events - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="events-page">
+      <section class="events-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a class="active" href="/photographers">For Photographers</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+          </div>
+
+          <a class="button gold-button" href="/photographers">Get Started</a>
+        </nav>
+
+        <header class="events-hero">
+          <a class="back-link" href="/photographers">‹</a>
+          <div>
+            <p>Event Planner</p>
+            <h1>Capture every detail before the shoot.</h1>
+          </div>
+        </header>
+
+        <div class="events-layout event-composer" id="event-composer" aria-hidden="true">
+          <form class="event-form" id="event-form" th:action="@{/events}" th:object="${event}" method="post">
+            <div class="form-grid">
+              <label>
+                Client Name
+                <input id="client-name" type="text" th:field="*{clientName}" placeholder="Enter client name" required />
+              </label>
+
+              <label>
+                Event Type
+                <select id="event-type" th:field="*{eventType}">
+                  <option value="Wedding">Wedding</option>
+                  <option value="Birthday">Birthday</option>
+                  <option value="Engagement">Engagement</option>
+                  <option value="Corporate Event">Corporate Event</option>
+                  <option value="Portrait Session">Portrait Session</option>
+                </select>
+              </label>
+
+              <label>
+                Event Date
+                <input id="event-date" type="date" th:field="*{eventDate}" required />
+              </label>
+
+              <label>
+                Start Time
+                <input id="event-time" type="time" th:field="*{startTime}" required />
+              </label>
+
+              <label class="wide">
+                Destination Address
+                <input id="event-address" type="text" th:field="*{destinationAddress}" placeholder="Venue name, street, city" required />
+              </label>
+
+              <label class="wide">
+                Notes
+                <textarea id="event-notes" rows="4" th:field="*{notes}" placeholder="Key moments, client requests, parking, contact person..."></textarea>
+              </label>
+            </div>
+
+            <button class="button gold-button event-save" type="submit">Save Event Details</button>
+          </form>
+
+          <aside class="event-preview">
+            <h2>Event Summary</h2>
+            <div class="summary-card">
+              <span class="summary-badge" id="summary-type">Event</span>
+              <h3 id="summary-client">Client name</h3>
+              <p id="summary-date">Pick date and time</p>
+              <p id="summary-address">Add destination address</p>
+            </div>
+          </aside>
+        </div>
+
+        <div class="section-heading events-list-heading">
+          <h2>Your Events</h2>
+          <button class="button gold-button" type="button" data-open-event-form>+ New Event</button>
+        </div>
+
+        <section class="event-list events-management-list">
+          <p class="upload-message" th:if="${uploadMessage}" th:text="${uploadMessage}">Upload complete.</p>
+          <article class="empty-state" th:if="${events == null or events.isEmpty()}">
+            <strong>No events yet</strong>
+            <p>Create your first event to start organizing client details, dates, and galleries.</p>
+            <button class="button gold-button" type="button" data-open-event-form>Create Event</button>
+          </article>
+          <article class="event-card dashboard-event-card" th:each="savedEvent : ${events}">
+            <div class="event-date-badge">
+              <strong th:text="${savedEvent.eventDate != null ? savedEvent.eventDate.dayOfMonth : '--'}">--</strong>
+              <span th:text="${savedEvent.eventDate != null ? #temporals.format(savedEvent.eventDate, 'MMM') : 'Date'}">Date</span>
+            </div>
+            <div>
+              <h3>
+                <a class="client-detail-link" th:href="@{/events/{id}(id=${savedEvent.id})}" th:text="${savedEvent.clientName}">Client name</a>
+              </h3>
+              <p>
+                <span th:text="${savedEvent.startTime}">Time</span>
+                <span> - </span>
+                <span th:text="${savedEvent.destinationAddress}">Destination</span>
+              </p>
+              <p class="photo-count">
+                <span th:text="${photoCounts.get(savedEvent.id)}">0</span>
+                <span> photos uploaded</span>
+              </p>
+            </div>
+            <div class="event-actions">
+              <span class="event-tag" th:text="${savedEvent.eventType}">Event</span>
+              <a class="button light-button event-detail-button" th:href="@{/events/{id}(id=${savedEvent.id})}">View Details</a>
+            </div>
+          </article>
+        </section>
+
+        <nav class="dashboard-tabs dashboard-tabs-compact events-tabs" aria-label="Dashboard menu">
+          <a href="/">⌂<span>Dashboard</span></a>
+          <a class="active" href="/events">▣<span>Events</span></a>
+        </nav>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

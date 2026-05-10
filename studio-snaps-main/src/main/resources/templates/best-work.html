@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Work - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="portfolio-page">
+      <section class="portfolio-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/photographers">For Photographers</a>
+            <a class="active" href="/best-work">Best Work</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+          </div>
+
+          <a class="button gold-button" href="/events">Events</a>
+        </nav>
+
+        <header class="portfolio-hero">
+          <a class="back-link" href="/">&#8249;</a>
+          <div>
+            <p>Portfolio Studio</p>
+            <h1>Upload your best work by photography scheme.</h1>
+          </div>
+        </header>
+
+        <p class="upload-message portfolio-message" th:if="${bestWorkMessage}" th:text="${bestWorkMessage}">Best work uploaded.</p>
+
+        <section class="portfolio-layout">
+          <form class="portfolio-upload-form" th:action="@{/best-work}" method="post" enctype="multipart/form-data">
+            <div class="portfolio-panel-heading">
+              <div>
+                <p>Curate Portfolio</p>
+                <h2>Add Best Work</h2>
+              </div>
+              <span th:text="${bestWorkCount}">0</span>
+            </div>
+
+            <div class="portfolio-form-grid">
+              <label>
+                Scheme
+                <select name="scheme" required>
+                  <option th:each="scheme : ${schemes}" th:value="${scheme}" th:text="${scheme}">Wedding</option>
+                </select>
+              </label>
+              <label>
+                Shoot Title
+                <input type="text" name="title" placeholder="Golden hour birthday portraits" required />
+              </label>
+              <div class="portfolio-file-uploader wide" id="portfolio-file-uploader">
+                <input class="portfolio-file-input" id="portfolio-photo-input" type="file" name="photos" multiple accept="image/*" required />
+                <div class="portfolio-file-head">
+                  <strong id="portfolio-file-count">No files selected</strong>
+                  <button type="button" id="portfolio-clear-top" aria-label="Clear selected photos">x</button>
+                </div>
+                <div class="portfolio-file-row">
+                  <label class="portfolio-file-thumb" for="portfolio-photo-input">
+                    <img id="portfolio-file-preview" alt="" hidden />
+                    <span id="portfolio-file-empty">+</span>
+                  </label>
+                  <div class="portfolio-file-meta">
+                    <strong id="portfolio-upload-title">Choose portfolio photos</strong>
+                    <small id="portfolio-upload-status">Select the strongest images for this scheme.</small>
+                  </div>
+                </div>
+                <div class="portfolio-upload-progress" id="portfolio-upload-progress" aria-live="polite">
+                  <div class="progress-track">
+                    <span class="progress-bar"></span>
+                  </div>
+                </div>
+                <div class="portfolio-file-actions">
+                  <button class="button light-button" type="button" id="portfolio-clear-files">Clear</button>
+                  <button class="button gold-button" type="submit">Done</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+        </section>
+
+        <section class="portfolio-gallery">
+          <div class="section-heading">
+            <h2>Best Work Gallery</h2>
+            <span class="photo-count">
+              <span th:text="${bestWorkCount}">0</span>
+              <span> photos</span>
+            </span>
+          </div>
+
+          <article class="empty-state" th:if="${bestWorkCount == 0}">
+            <strong>No best work uploaded yet</strong>
+            <p>Add portfolio photos by scheme so visitors can browse the photographer's strongest work.</p>
+          </article>
+
+          <section class="portfolio-scheme-section" th:each="scheme : ${schemes}" th:if="${!#lists.isEmpty(photosByScheme.get(scheme))}">
+            <header>
+              <h3 th:text="${scheme}">Wedding</h3>
+              <span>
+                <span th:text="${#lists.size(photosByScheme.get(scheme))}">0</span>
+                <span> photos</span>
+              </span>
+            </header>
+            <div class="photo-grid portfolio-photo-grid">
+              <article class="portfolio-photo-card" th:each="photo : ${photosByScheme.get(scheme)}">
+                <div class="portfolio-photo-media">
+                  <img th:src="${bestWorkPhotoUrls.get(photo.id)}" th:alt="${photo.title}" />
+                  <form class="portfolio-delete-form" th:action="@{/best-work/{id}/delete(id=${photo.id})}" method="post">
+                    <button type="submit" aria-label="Delete best work photo">Delete</button>
+                  </form>
+                </div>
+                <div>
+                  <strong th:text="${photo.title}">Shoot title</strong>
+                  <p th:if="${photo.description != null and !photo.description.isBlank()}" th:text="${photo.description}">Description</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

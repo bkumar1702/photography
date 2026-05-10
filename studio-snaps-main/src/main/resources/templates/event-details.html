@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Details - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="event-detail-page">
+      <section class="event-detail-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a class="active" href="/photographers">For Photographers</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+          </div>
+
+          <a class="button gold-button" href="/events">Events</a>
+        </nav>
+
+        <header class="event-detail-hero">
+          <a class="back-link" href="/events">&lsaquo;</a>
+          <div>
+            <p th:text="${event.eventType}">Event Type</p>
+            <h1 th:text="${event.clientName}">Client name</h1>
+          </div>
+        </header>
+
+        <section class="event-detail-layout">
+          <article class="client-detail-panel">
+            <h2>Client Details</h2>
+            <dl class="detail-list">
+              <div>
+                <dt>Client Name</dt>
+                <dd th:text="${event.clientName}">Client name</dd>
+              </div>
+              <div>
+                <dt>Event Type</dt>
+                <dd th:text="${event.eventType}">Wedding</dd>
+              </div>
+              <div>
+                <dt>Date</dt>
+                <dd th:text="${event.eventDate != null ? #temporals.format(event.eventDate, 'dd MMM yyyy') : 'Not set'}">Date</dd>
+              </div>
+              <div>
+                <dt>Start Time</dt>
+                <dd th:text="${event.startTime}">Time</dd>
+              </div>
+              <div class="wide">
+                <dt>Destination Address</dt>
+                <dd th:text="${event.destinationAddress}">Destination address</dd>
+              </div>
+              <div class="wide" th:if="${event.notes != null and !event.notes.isBlank()}">
+                <dt>Notes</dt>
+                <dd th:text="${event.notes}">Notes</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="event-upload-panel">
+            <div class="event-upload-heading">
+              <h2>Upload Photos</h2>
+              <span>Event gallery</span>
+            </div>
+            <p class="upload-message" th:if="${uploadMessage}" th:text="${uploadMessage}">Upload complete.</p>
+            <p class="upload-message" th:if="${shareMessage}" th:text="${shareMessage}">Share link ready.</p>
+
+            <form class="event-detail-upload" th:action="@{/events/{id}/photos(id=${event.id})}" method="post" enctype="multipart/form-data">
+              <label class="upload-dropzone detail-upload-dropzone" for="event-photo-input">
+                <input class="photo-input" id="event-photo-input" type="file" name="photos" multiple accept="image/*" required />
+                <span class="upload-cloud" aria-hidden="true">&uArr;</span>
+                <span>
+                  <strong id="event-upload-title">Choose photos</strong>
+                  <small id="event-upload-help">Select JPG or PNG files for this event.</small>
+                </span>
+              </label>
+
+              <button class="button gold-button event-upload-submit" type="submit">Upload Photos</button>
+
+              <div class="event-upload-progress" id="event-upload-progress" aria-live="polite">
+                <div class="progress-track">
+                  <span class="progress-bar"></span>
+                </div>
+                <p id="event-upload-status">Choose photos to start.</p>
+              </div>
+            </form>
+
+          </article>
+
+          <article class="share-link-panel event-share-panel">
+            <div>
+              <h3>Client Selection Link</h3>
+              <p>Share this private gallery link so the client can select their favorite photos.</p>
+            </div>
+            <form th:if="${event.shareToken == null or event.shareToken.isBlank()}" th:action="@{/events/{id}/share(id=${event.id})}" method="post">
+              <button class="button light-button" type="submit">Create Share Link</button>
+            </form>
+            <button
+              class="client-share-link"
+              th:if="${event.shareToken != null and !event.shareToken.isBlank()}"
+              th:data-share-path="@{/client/events/{id}/gallery(id=${event.id}, token=${event.shareToken})}"
+              type="button"
+              data-open-share-popup>
+              Share Client Gallery
+            </button>
+          </article>
+        </section>
+
+        <section class="event-photo-section">
+          <p class="upload-message" th:if="${event.clientSelectionSubmitted}">
+            <span>Client sent </span>
+            <span th:text="${selectedPhotoCount}">0</span>
+            <span> selected photo(s)</span>
+            <span th:if="${event.clientSelectionSubmittedAt != null}">
+              <span> on </span>
+              <span th:text="${#temporals.format(event.clientSelectionSubmittedAt, 'dd MMM yyyy, hh:mm a')}">date</span>
+            </span>
+            <span>.</span>
+          </p>
+
+          <article class="photo-review-panel">
+            <div>
+              <h2>Photo Review</h2>
+              <p>
+                <span th:text="${photos.size()}">0</span>
+                <span> uploaded photos</span>
+                <span> / </span>
+                <span th:text="${selectedPhotoCount}">0</span>
+                <span> client favourites</span>
+              </p>
+            </div>
+            <a class="button gold-button" th:href="@{/events/{id}/photos(id=${event.id})}">View Photos</a>
+          </article>
+        </section>
+
+        <nav class="dashboard-tabs dashboard-tabs-compact events-tabs" aria-label="Dashboard menu">
+          <a href="/">&#8962;<span>Dashboard</span></a>
+          <a class="active" href="/events">&#9633;<span>Events</span></a>
+        </nav>
+      </section>
+
+      <section
+        class="share-modal"
+        id="share-modal"
+        th:classappend="${shareMessage != null} ? ' open'"
+        th:if="${event.shareToken != null and !event.shareToken.isBlank()}"
+        aria-hidden="true">
+        <div class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-title">
+          <header class="upload-header">
+            <button class="back-link" type="button" data-close-share-popup aria-label="Close share popup">&lsaquo;</button>
+            <h2 id="share-title">Share With Client</h2>
+            <span class="icon-button" aria-hidden="true">M</span>
+          </header>
+
+          <div class="share-copy-box">
+            <p>Copy this link and send it to the client. Their favourites will appear in a separate tab while your original uploads stay in All Photos.</p>
+            <input id="client-share-url" th:data-share-path="@{/client/events/{id}/gallery(id=${event.id}, token=${event.shareToken})}" readonly />
+            <button class="button gold-button" type="button" id="copy-share-link">Copy Link</button>
+            <a class="button light-button" id="open-share-link" th:href="@{/client/events/{id}/gallery(id=${event.id}, token=${event.shareToken})}" target="_blank" rel="noopener">Open Gallery</a>
+            <small id="share-copy-status">Ready to share.</small>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

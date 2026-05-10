@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photographer Dashboard - Momento</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="dashboard-page">
+      <section class="dashboard-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a class="active" href="/photographers">For Photographers</a>
+            <a href="#dashboard-calendar" data-dashboard-tab="dashboard-calendar">Calendar</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+          </div>
+
+          <div class="nav-actions">
+            <button class="button light-button logout-button" type="button" data-photographer-logout>Logout</button>
+          </div>
+        </nav>
+
+        <header class="dashboard-header">
+          <a class="back-link" href="/">‹</a>
+          <h1>Photographer Dashboard</h1>
+          <div class="profile-actions">
+            <button class="icon-button" type="button" aria-label="Notifications">!</button>
+            <div class="avatar avatar-placeholder" aria-label="Photographer profile">M</div>
+          </div>
+        </header>
+
+        <div class="dashboard-panel active" id="dashboard-overview">
+        <section class="welcome-block">
+          <h2>Welcome back</h2>
+          <p>Your studio activity will appear here as you add events, clients, and galleries.</p>
+        </section>
+
+        <section class="stats-grid" aria-label="Photography stats">
+          <article><strong th:text="${eventCount}">0</strong><span>Total Events</span></article>
+          <article><strong th:text="${eventCount}">0</strong><span>Active Events</span></article>
+          <article><strong th:text="${photoUploadCount}">0</strong><span>Photos Uploaded</span></article>
+          <article><strong>0</strong><span>Photos Selected</span></article>
+        </section>
+
+        <section class="dashboard-actions empty-state">
+          <strong>Plan your next shoot</strong>
+          <p>Open the events workspace to create events, review bookings, and upload galleries.</p>
+          <a class="button gold-button" href="/events">Open Events</a>
+        </section>
+        </div>
+
+        <div class="dashboard-panel" id="dashboard-calendar">
+        <section class="calendar-panel" aria-label="Event calendar">
+          <div class="calendar-heading">
+            <div>
+              <span>Event Calendar</span>
+              <h2 id="calendar-month">Calendar</h2>
+            </div>
+            <div class="calendar-controls">
+              <button type="button" data-calendar-prev aria-label="Previous month">&lt;</button>
+              <button type="button" data-calendar-next aria-label="Next month">&gt;</button>
+            </div>
+          </div>
+
+          <div
+            class="calendar-source"
+            th:each="savedEvent : ${events}"
+            th:data-id="${savedEvent.id}"
+            th:data-client="${savedEvent.clientName}"
+            th:data-type="${savedEvent.eventType}"
+            th:data-date="${savedEvent.eventDate}"
+            th:data-time="${savedEvent.startTime}"
+            th:data-address="${savedEvent.destinationAddress}"
+            th:data-notes="${savedEvent.notes}">
+          </div>
+
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+          </div>
+          <div class="calendar-grid" id="event-calendar"></div>
+          <p class="calendar-empty" id="calendar-empty">Create an event to see it highlighted here.</p>
+        </section>
+        </div>
+
+        <nav class="dashboard-tabs dashboard-tabs-compact" aria-label="Dashboard menu">
+          <button type="button" data-dashboard-tab="dashboard-calendar">Cal<span>Calendar</span></button>
+          <a class="active" href="/">⌂<span>Dashboard</span></a>
+          <a href="/events">▣<span>Events</span></a>
+        </nav>
+      </section>
+    </main>
+
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>

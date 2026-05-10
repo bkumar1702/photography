@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Momento</title>
+  	<link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <main class="landing-shell">
+      <section class="landing-card">
+        <nav class="site-nav">
+          <a class="brand" href="/" aria-label="Momento home">
+            <span class="brand-icon">M</span>
+            <span>Momento</span>
+          </a>
+
+          <div class="nav-links">
+            <a class="active" href="/">Home</a>
+            <a href="/photographers">For Photographers</a>
+          </div>
+
+          <a class="button gold-button" href="/photographers">For Photographers</a>
+        </nav>
+
+        <div class="hero-area">
+          <img class="hero-bg" th:src="@{/photography.jpg}" alt="Camera" />
+		            <div class="hero-copy">
+            <h1>Capture Moments. Share <span>Memories.</span></h1>
+            <p>The elegant way to deliver and share event photos that last forever.</p>
+
+            <div class="hero-actions">
+              <button class="button light-button" type="button">
+                <span class="play-icon"></span>
+                Explore More
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <article>
+            <span class="feature-icon">G</span>
+            <div>
+              <h2>Beautiful Galleries</h2>
+              <p>Stunning galleries for every event</p>
+            </div>
+          </article>
+          <article>
+            <span class="feature-icon">S</span>
+            <div>
+              <h2>Easy Sharing</h2>
+              <p>Share memories instantly</p>
+            </div>
+          </article>
+          <article>
+            <span class="feature-icon">C</span>
+            <div>
+              <h2>Client Selection</h2>
+              <p>Let clients favorite their photos</p>
+            </div>
+          </article>
+          <article>
+            <span class="feature-icon">P</span>
+            <div>
+              <h2>Secure & Private</h2>
+              <p>Your moments, always protected</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <script th:src="@{/app.js}"></script>
+  </body>
+</html>
